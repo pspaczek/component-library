@@ -1,6 +1,6 @@
 {
   "name": "@infermedica/component-library",
-  "description": "Vue 3 UI library for healthcare and not only.",
+  "description": "Vue 3 UI library for healthcare and not only. Changes to test unito sync.",
   "version": "0.5.2",
   "engines": {
     "node": ">=16.13.2",
