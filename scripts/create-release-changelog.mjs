@@ -14,7 +14,7 @@ const releaseDate = new Date().toLocaleString('en-US', {
 
 const commitTypes = [
   {
-    type: 'breakingChanges',
+    type: 'breaking',
     icon: '⛔️',
     name: 'Breaking Changes',
   },
@@ -78,36 +78,51 @@ const saveFile = (version, content) => {
 const createChangelogSections = (commits) => {
   const groupedCommits = commits.reduce(
     (object, commit) => {
-      const [ match, type ] = commit.match(/(.*):/);
+      const [
+        match,
+        type,
+        scope,
+        breaking,
+      ] = commit.match(/^(.+?)(?:\((.+?)\))?(!)?:.*/);
       const formattedCommit = commit.replace(
         /.+: (.*?)(?:\(#(.*)\))?$/gm,
         (match, description, hash) => {
-          if( description && hash ) {
-            return `${description} ([#${hash}](${githubURL}${hash}))`
+          if (description && hash) {
+            return `${description} ([#${hash}](${githubURL}${hash}))`;
           }
           return '';
-        });
-      if(formattedCommit) {
-        object[type] = [
-          ...object[type] || [],
-          formattedCommit
-        ]
+        },
+      );
+      if (formattedCommit) {
+        if (breaking) {
+          object.breaking = [
+            ...object.breaking,
+            formattedCommit,
+          ];
+        } else {
+          object[type] = [
+            ...object[type] || [],
+            formattedCommit,
+          ];
+        }
       }
       return object;
     },
-    {}
-  )
+    {},
+  );
 
   return commitTypes.reduce(
-    (content, { type, icon, name } ) => {
-      if(groupedCommits[type]) {
-        return content
-          + `\n## ${icon} ${name}
+    (content, {
+      type, icon, name,
+    }) => {
+      if (groupedCommits[type]) {
+        return `${content
+        }\n## ${icon} ${name}
 * ${groupedCommits[type].join('\n* ')}\n`;
       }
       return content;
     },
-    ''
+    '',
   );
 };
 
@@ -116,7 +131,7 @@ const createChangelogMdx = (version, commits) => {
     major,
     minor,
   ] = version.split('.');
-  let doc = `import { Meta } from '@storybook/blocks';
+  const doc = `import { Meta } from '@storybook/blocks';
 
 <Meta title="Releases/v${major}.${minor}.x/v${version}/Changelog"/>
   
