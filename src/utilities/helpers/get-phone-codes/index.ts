@@ -1,8 +1,11 @@
 import * as i18nCountries from 'i18n-iso-countries';
 import countryCodes from 'country-codes-list';
 
-type CustomCountryCode = { code: string, countryCode: string } & Record<string, unknown>;
-export type PhoneCodeType = CustomCountryCode & Record<'country', string>;
+export type PhoneCodeType = {
+  code: string,
+  countryCode: string,
+  country?: string,
+ };
 
 const phoneCodes: Record<string, string>[] = countryCodes.customArray({
   code: '{countryCallingCode}',
@@ -23,7 +26,11 @@ export async function getPhoneCodes(language = 'en') {
       ...item,
       code: `+${item.code.replace(/\s+/g, '').replace('-', '')}`,
       country: i18nCountries.getName(item.countryCode, language),
+      countryCode: item.countryCode,
     }))
-    // TODO: fix types in this file
-    .sort((a, b) => ((a.country as string) > (b.country as string) ? 1 : -1));
+    .sort((a, b) => {
+      if (a.country && b.country) return a.country > b.country ? 1 : -1;
+
+      return 1;
+    });
 }

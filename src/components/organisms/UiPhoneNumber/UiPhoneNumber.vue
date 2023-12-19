@@ -5,22 +5,20 @@
       Phone number
     </UiText>
     <UiPhoneNumberPrefix
-      v-model:phone-code="phoneCode"
+      :phone-code="phoneCode"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref } from 'vue';
 import UiText from '../../atoms/UiText/UiText.vue';
 import UiPhoneNumberPrefix from './_internal/UiPhoneNumberPrefix.vue';
 
-const phoneCode = computed({
-  get: () => ({
-    code: '+1',
-    countryCode: 'US',
-  }),
-  set: (value) => value,
+const phoneCode = ref({
+  code: '+1',
+  countryCode: 'US',
+  country: 'United States of America',
 });
 
 </script>

@@ -1,7 +1,7 @@
 <template>
   <UiDropdown
     class="ui-phone-number__dropdown"
-    :model-value="code"
+    :model-value="modelValue"
     :popover-attrs="{ class: 'ui-phone-number__dropdown-popover' }"
     @update:model-value="handleOnChangeCode"
   >
@@ -31,7 +31,7 @@
       :key="key"
     >
       <UiDropdownItem
-        :value="option"
+        :value="option.code"
         class="ui-dropdown-item--compact ui-phone-number__dropdown-item"
       >
         {{ option.country }} ({{ option.code }})
@@ -59,11 +59,7 @@ import type { PhoneCodeType } from '../../../../utilities/helpers';
 import { type DropdownModelValue } from '../../../molecules/UiDropdown/UiDropdown.vue';
 
 export interface UiPhoneNumberProps {
-  phoneCode?: {
-    code: string,
-    countryCode?: string,
-    country?: string,
-  },
+  phoneCode?: PhoneCodeType,
   language?: string,
   error?: string | boolean,
 }
@@ -72,34 +68,24 @@ const props: UiPhoneNumberProps = withDefaults(defineProps<UiPhoneNumberProps>()
   phoneCode: () => ({
     code: '+1',
     countryCode: 'US',
+    country: 'United States o America',
   }),
   language: 'en',
   error: false,
 });
 
-const emit = defineEmits([ 'update:phoneCode' ]);
-
 const isLoading = ref(true);
 
-const phoneCodes = ref<(PhoneCodeType)[]>([]);
+const phoneCodes = ref<PhoneCodeType[]>([]);
+const prefixCode = computed(() => props.phoneCode?.code);
+const modelValue = ref(prefixCode.value);
 
-const code = computed<Record<string, unknown>>({
-  get: () => phoneCodes.value.find(
-    (prefix) => (
-      prefix.code === props.phoneCode?.code)
-        || (prefix.countryCode === props.phoneCode?.countryCode),
-  ) || phoneCodes.value[0],
-  set: (value) => {
-    emit('update:phoneCode', value);
-  },
-});
-
-const formattedPrefix = computed(() => props.phoneCode?.code.replace('+', '+ '));
+const formattedPrefix = computed(() => modelValue.value?.replace('+', '+ '));
 
 const popoverOffsetTop = ref<number>();
 
 const handleOnChangeCode = (value: DropdownModelValue) => {
-  code.value = value as Record<string, unknown>;
+  modelValue.value = (value as PhoneCodeType).code;
 };
 
 const updateOffset = (event: MouseEvent, callback: () => void) => {
