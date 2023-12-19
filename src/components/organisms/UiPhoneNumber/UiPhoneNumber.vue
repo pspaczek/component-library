@@ -5,7 +5,7 @@
       Phone number
     </UiText>
     <UiPhoneNumberPrefix
-      :phone-code="phoneCode"
+      v-model="prefix"
     />
   </div>
 </template>
@@ -13,9 +13,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiText from '../../atoms/UiText/UiText.vue';
-import UiPhoneNumberPrefix from './_internal/UiPhoneNumberPrefix.vue';
+import UiPhoneNumberPrefix from './_internal/UiPhoneNumberPrefix/UiPhoneNumberPrefix.vue';
 
-const phoneCode = ref({
+const prefix = ref({
   code: '+1',
   countryCode: 'US',
   country: 'United States of America',
