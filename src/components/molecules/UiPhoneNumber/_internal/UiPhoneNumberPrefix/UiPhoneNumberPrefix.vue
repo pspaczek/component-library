@@ -45,8 +45,9 @@ import {
   type SupportedCountryCodeType,
 } from '../../helpers';
 import { type CountryCodes } from '../../UiPhoneNumber.vue';
+import type { DefineAttrsProps } from '../../../../../types';
 
-export interface UiPhoneNumberPrefixProps {
+export interface PhoneNumberPrefixProps {
   /**
    * Use this props to set default prefix phone code.
    */
@@ -63,8 +64,9 @@ export interface UiPhoneNumberPrefixProps {
    */
   countryCodes?: CountryCodes,
 }
+export type PhoneNumberPrefixAttrsProps = DefineAttrsProps<PhoneNumberPrefixProps>
 
-const props = withDefaults(defineProps<UiPhoneNumberPrefixProps>(), {
+const props = withDefaults(defineProps<PhoneNumberPrefixProps>(), {
   modelValue: () => ({
     code: '',
     countryCode: '',
@@ -106,8 +108,8 @@ onMounted(async () => {
 
   &__popover {
     @include mixins.override-logical('popover', null, border-width, 0);
-
     --dropdown-popover-width: 100%;
+    --dropdown-popover-width: #{functions.var($element + "-popover", width, 100% )};
     --dropdown-popover-min-height: #{functions.var($element + '-popover', min-height, 12.5rem)};
 
     z-index: functions.var($element + '-popover', z-index, 1);

@@ -67,10 +67,10 @@ import {
   type InputHTMLAttributes,
   type LabelHTMLAttributes,
 } from 'vue';
-import equal from 'fast-deep-equal';
 import { uid } from 'uid/single';
 import { useAttributes } from '../../../composable';
 import { keyboardFocus as vKeyboardFocus } from '../../../utilities/directives';
+import { equal } from '../../../utilities/helpers';
 import UiText from '../UiText/UiText.vue';
 import type { TextAttrsProps } from '../UiText/UiText.vue';
 import type { DefineAttrsProps } from '../../../types';
@@ -157,17 +157,14 @@ const hasLabel = computed(() => (!!slots.default));
 const radioId = computed(() => (
   props.id || `radio-${uid()}`
 ));
-const isChecked = computed(() => (equal(
-  JSON.parse(JSON.stringify(props.value)),
-  JSON.parse(JSON.stringify(props.modelValue)),
-)));
+const isChecked = computed(() => equal(props.value, props.modelValue));
 const changeHandler = (event: Event) => {
   const el = event.target as HTMLInputElement;
   if (el.checked) {
     emit('update:modelValue', JSON.parse(JSON.stringify(props.value)));
   }
 };
-const input = ref<HTMLElement | null>(null);
+const input = ref<HTMLInputElement | null>(null);
 defineExpose({ input });
 </script>
 

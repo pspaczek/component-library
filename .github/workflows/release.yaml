@@ -1,28 +1,32 @@
-on:
-  push:
-    tags:
-      - 'v*'
-    branches:
-      - main
-
 name: Release
-
+on:
+  pull_request:
+    branches:
+      - 'releases/**'
+    types:
+      - closed
 jobs:
-  build:
-    name: Create Release
+  if-merged:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Create Release
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Tag Version
+        uses: cardinalby/git-tag-action@master
+        env:
+          TAG: ${{github.event.pull_request.title}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{github.ref}}
-          release_name: ${{github.ref}}
-          # body: Text describing the contents of the release. Optional, and not needed if using body_path.
-          # body_path A file with contents describing the release. Optional, and not needed if using body.
+          tag_name: ${{github.event.pull_request.title}}
+          release_name: ${{github.event.pull_request.title}}
+          body: ${{github.event.pull_request.description}}
           draft: false
           prerelease: false

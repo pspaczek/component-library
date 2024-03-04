@@ -8,14 +8,19 @@
       name="hint"
       v-bind="{
         hint,
-        hintType,
         hintAlertAttrs,
       }"
     >
+      <UiText
+        v-if="!isAlertDisplayed"
+        class="ui-text--body-2-comfortable ui-multiple-answer__hint"
+      >
+        {{ hint }}
+      </UiText>
       <UiAlert
-        v-if="hint"
+        v-if="isAlertDisplayed"
         v-bind="hintAlertAttrs"
-        :type="hintType"
+        type="error"
         class="ui-multiple-answer__hint"
       >
         {{ hint }}
@@ -51,6 +56,7 @@
           name="list-item"
         >
           <UiMultipleAnswerItem
+            :ref="(el)=>{ setFirstMultipleAnswerItemRef(el, index) }"
             v-model="value"
             v-bind="item"
             :invalid="hasError"
@@ -74,8 +80,11 @@
 <script setup lang="ts">
 import {
   computed,
+  ref,
   watch,
+  type ComponentPublicInstance,
 } from 'vue';
+import UiText from '../../atoms/UiText/UiText.vue';
 import UiAlert from '../../molecules/UiAlert/UiAlert.vue';
 import type { AlertAttrsProps } from '../../molecules/UiAlert/UiAlert.vue';
 import UiList from '../UiList/UiList.vue';
@@ -85,6 +94,7 @@ import type {
   DefineAttrsProps,
   HTMLTag,
 } from '../../../types';
+import { focusElement } from '../../../utilities/helpers';
 
 export type MultipleAnswerModelValue = string | Record<string, unknown> | (string | Record<string, unknown>)[];
 export interface MultipleAnswerProps {
@@ -131,6 +141,8 @@ export interface MultipleAnswerEmits {
   (e: 'update:invalid', value: boolean): void;
 }
 
+const firstMultipleAnswerItemRef = ref<HTMLInputElement | null>(null);
+
 const props = withDefaults(defineProps<MultipleAnswerProps>(), {
   modelValue: () => ([]),
   items: () => ([]),
@@ -143,11 +155,14 @@ const props = withDefaults(defineProps<MultipleAnswerProps>(), {
   legend: '',
 });
 const emit = defineEmits<MultipleAnswerEmits>();
+
 const valid = computed(() => (Array.isArray(props.modelValue)
   ? !!props.modelValue.length
   : !!Object.keys(props.modelValue).length));
-const hasError = computed(() => (props.touched && !valid.value));
-const hintType = computed<'error'|'default'>(() => (props.touched && props.invalid ? 'error' : 'default'));
+const hasError = computed(() => props.touched && !valid.value);
+
+const isAlertDisplayed = computed(() => props.hint !== '' && hasError.value);
+
 watch(valid, (value) => {
   emit('update:invalid', !value);
 }, { immediate: true });
@@ -178,6 +193,27 @@ const itemsToRender = computed(() => (props.items.map((item) => {
     },
   };
 })));
+
+const setFirstMultipleAnswerItemRef = (
+  el: Element | ComponentPublicInstance | null,
+  index: number,
+) => {
+  if (!el || index > 0) return;
+
+  const multipleAnswerItem = el as InstanceType<typeof UiMultipleAnswerItem>;
+
+  if (multipleAnswerItem.content) firstMultipleAnswerItemRef.value = multipleAnswerItem.content.input;
+};
+
+watch([
+  hasError,
+  firstMultipleAnswerItemRef,
+], ([
+  errorValue,
+  item,
+]) => {
+  if (errorValue) focusElement(item, true);
+});
 </script>
 
 <style lang="scss">
